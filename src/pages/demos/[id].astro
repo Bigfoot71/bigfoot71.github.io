@@ -1,0 +1,19 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getCollection, render } from 'astro:content';
+
+export async function getStaticPaths() {
+	const demos = await getCollection('demos');
+	return demos.map((demo) => ({
+		params: { id: demo.id },
+		props: { demo },
+	}));
+}
+
+const { demo } = Astro.props;
+const { Content } = await render(demo);
+---
+<Layout title={`${demo.data.title} - Bigfoot71`}>
+	<h1>{demo.data.title}</h1>
+	<Content />
+</Layout>

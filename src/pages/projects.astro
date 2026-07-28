@@ -1,0 +1,20 @@
+---
+import Layout from '../layouts/Layout.astro';
+import CatalogCard from '../components/CatalogCard.astro';
+import { getCollection } from 'astro:content';
+
+const projects = (await getCollection('projects'))
+	.sort((a, b) => a.data.title.localeCompare(b.data.title));
+---
+<Layout title="Projects - Bigfoot71">
+	<h1>Projects</h1>
+	<div class="catalog-grid">
+		{projects.map((project) => (
+			<CatalogCard
+				href={`/projects/${project.id}`}
+				title={project.data.title}
+				image={project.data.image}
+			/>
+		))}
+	</div>
+</Layout>

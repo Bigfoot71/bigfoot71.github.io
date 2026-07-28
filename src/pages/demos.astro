@@ -1,0 +1,20 @@
+---
+import Layout from '../layouts/Layout.astro';
+import CatalogCard from '../components/CatalogCard.astro';
+import { getCollection } from 'astro:content';
+
+const posts = (await getCollection('demos'))
+	.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+---
+<Layout title="Demos - Bigfoot71">
+	<h1>Demos</h1>
+	<div class="catalog-grid">
+		{posts.map((post) => (
+			<CatalogCard
+				href={`/demos/${post.id}`}
+				title={post.data.title}
+				image={post.data.image}
+			/>
+		))}
+	</div>
+</Layout>
