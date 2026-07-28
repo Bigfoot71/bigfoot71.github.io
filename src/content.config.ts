@@ -5,7 +5,7 @@ const projects = defineCollection({
 	loader: glob({ pattern: '**/*.md', base: './src/content/projects' }),
 	schema: z.object({
 		title: z.string(),
-		image: z.string(),
+		image: z.string().optional(),
 		description: z.string().optional(),
 	}),
 });
@@ -14,7 +14,7 @@ const blog = defineCollection({
 	loader: glob({ pattern: '**/*.md', base: './src/content/blog' }),
 	schema: z.object({
 		title: z.string(),
-		image: z.string(),
+		image: z.string().optional(),
 		date: z.date(),
 		description: z.string().optional(),
 	}),
@@ -24,7 +24,7 @@ const demos = defineCollection({
 	loader: glob({ pattern: '**/*.md', base: './src/content/demos' }),
 	schema: z.object({
 		title: z.string(),
-		image: z.string(),
+		image: z.string().optional(),
 		date: z.date(),
 		description: z.string().optional(),
 	}),
