@@ -49,6 +49,43 @@ const ogImage = image ? new URL(image, Astro.site) : new URL('/og-default.png', 
 			<slot />
 		</main>
 		<Footer />
+
+		<script>
+			function enhanceCodeBlocks() {
+				document.querySelectorAll<HTMLPreElement>('pre.astro-code').forEach((pre) => {
+					if (pre.closest('.code-block')) return; // already enhanced
+
+					const lang = pre.getAttribute('data-language') || 'text';
+
+					const wrapper = document.createElement('div');
+					wrapper.className = 'code-block';
+
+					const header = document.createElement('div');
+					header.className = 'code-block-header';
+
+					const langLabel = document.createElement('span');
+					langLabel.className = 'code-block-lang';
+					langLabel.textContent = lang;
+
+					const copyBtn = document.createElement('button');
+					copyBtn.className = 'code-block-copy';
+					copyBtn.type = 'button';
+					copyBtn.textContent = 'Copy';
+					copyBtn.addEventListener('click', async () => {
+						await navigator.clipboard.writeText(pre.innerText);
+						copyBtn.textContent = 'Copied!';
+						setTimeout(() => (copyBtn.textContent = 'Copy'), 1500);
+					});
+
+					header.append(langLabel, copyBtn);
+
+					pre.parentNode?.insertBefore(wrapper, pre);
+					wrapper.append(header, pre);
+				});
+			}
+
+			enhanceCodeBlocks();
+		</script>
 	</body>
 </html>
 
@@ -99,6 +136,66 @@ const ogImage = image ? new URL(image, Astro.site) : new URL('/og-default.png', 
 		display: grid;
 		grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
 		gap: 1.5rem;
+	}
+
+	pre.astro-code {
+		margin: 0;
+		padding: 1.1rem 1.25rem;
+		overflow-x: auto;
+		font-size: 0.85rem;
+		line-height: 1.6;
+		border: none;
+	}
+
+	code:not(pre code) {
+		background: var(--surface);
+		border: 1px solid var(--border);
+		border-radius: 4px;
+		padding: 0.15em 0.4em;
+		font-size: 0.85em;
+		font-family: var(--font-display);
+	}
+
+	.code-block {
+		margin: 1.75rem 0;
+		border-radius: 12px;
+		border: 1px solid var(--border);
+		overflow: hidden;
+	}
+
+	.code-block-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 0.5rem 1rem;
+		background: var(--surface);
+		border-bottom: 1px solid var(--border);
+	}
+
+	.code-block-lang {
+		font-family: var(--font-display);
+		font-size: 0.75rem;
+		color: var(--text-muted);
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+	}
+
+	.code-block-copy {
+		font-family: var(--font-display);
+		font-size: 0.75rem;
+		color: var(--text-muted);
+		background: none;
+		border: 1px solid var(--border);
+		border-radius: 6px;
+		padding: 0.25rem 0.6rem;
+		cursor: pointer;
+		appearance: none;
+		transition: border-color 0.2s ease, color 0.2s ease;
+	}
+
+	.code-block-copy:hover {
+		border-color: var(--accent);
+		color: var(--accent);
 	}
 </style>
 
