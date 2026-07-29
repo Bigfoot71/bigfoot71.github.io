@@ -3,8 +3,9 @@ interface Props {
 	href: string;
 	title: string;
 	image?: string;
+	tags?: string[];
 }
-const { href, title, image } = Astro.props;
+const { href, title, image, tags } = Astro.props;
 
 const letter = title.trim().charAt(0).toUpperCase();
 ---
@@ -16,6 +17,15 @@ const letter = title.trim().charAt(0).toUpperCase();
 			<span class="monogram">{letter}</span>
 		</div>
 	)}
+
+	{tags && tags.length > 0 && (
+		<div class="tags">
+			{tags.map((tag) => (
+				<span class="tag">{tag}</span>
+			))}
+		</div>
+	)}
+
 	<div class="overlay">
 		<h3>{title}</h3>
 	</div>
@@ -75,6 +85,26 @@ const letter = title.trim().charAt(0).toUpperCase();
 	.card:hover .monogram {
 		opacity: 0.6;
 		transform: scale(1.08);
+	}
+
+	.tags {
+		position: absolute;
+		top: 0.6rem;
+		left: 0.6rem;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.4rem;
+		max-width: calc(100% - 1.2rem);
+	}
+	.tag {
+		font-family: var(--font-display);
+		font-size: 0.7rem;
+		padding: 0.2rem 0.5rem;
+		border-radius: 5px;
+		background: rgba(11, 14, 20, 0.75);
+		border: 1px solid var(--border);
+		color: var(--text-muted);
+		backdrop-filter: blur(2px);
 	}
 
 	.overlay {
