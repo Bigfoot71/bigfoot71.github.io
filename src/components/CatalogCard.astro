@@ -10,13 +10,13 @@ const { href, title, image, tags } = Astro.props;
 const letter = title.trim().charAt(0).toUpperCase();
 ---
 <a href={href} class="card">
-	{image ? (
-		<img src={image} alt={title} />
-	) : (
-		<div class="placeholder">
+	<div class="visual">
+		{image ? (
+			<img src={image} alt={title} />
+		) : (
 			<span class="monogram">{letter}</span>
-		</div>
-	)}
+		)}
+	</div>
 
 	{tags && tags.length > 0 && (
 		<div class="tags">
@@ -42,18 +42,8 @@ const letter = title.trim().charAt(0).toUpperCase();
 		background: var(--surface);
 		text-decoration: none;
 	}
-	.card img {
-		width: 100%;
-		height: 100%;
-		object-fit: cover;
-		display: block;
-		transition: transform 0.3s ease;
-	}
-	.card:hover img {
-		transform: scale(1.05);
-	}
 
-	.placeholder {
+	.visual {
 		width: 100%;
 		height: 100%;
 		position: relative;
@@ -63,7 +53,7 @@ const letter = title.trim().charAt(0).toUpperCase();
 		background: linear-gradient(135deg, var(--surface), #171D29);
 		overflow: hidden;
 	}
-	.placeholder::before {
+	.visual::before {
 		content: '';
 		position: absolute;
 		inset: 0;
@@ -71,6 +61,18 @@ const letter = title.trim().charAt(0).toUpperCase();
 		background-image: linear-gradient(var(--border) 1px, transparent 1px),
 			linear-gradient(90deg, var(--border) 1px, transparent 1px);
 		background-size: 24px 24px;
+	}
+
+	.visual img {
+		position: relative;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		display: block;
+		transition: transform 0.3s ease;
+	}
+	.card:hover .visual img {
+		transform: scale(1.05);
 	}
 
 	.monogram {
