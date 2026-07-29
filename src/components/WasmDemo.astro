@@ -1,0 +1,130 @@
+---
+interface Props {
+	path: string;
+	title: string;
+	width?: number;
+	height?: number;
+}
+const { path, title, width = 16, height = 9 } = Astro.props;
+const frameId = `wasm-frame-${Math.random().toString(36).slice(2, 9)}`;
+---
+<div class="wasm-demo" style={`--ratio: ${width} / ${height};`}>
+	<div class="frame-wrap">
+		<iframe
+			id={frameId}
+			data-src={path}
+			title={title}
+			allow="autoplay; gamepad; fullscreen"
+			loading="lazy"
+		></iframe>
+		<button class="play-overlay" data-target={frameId} type="button">
+			<span class="play-icon">▶</span>
+			<span>Click to launch</span>
+		</button>
+	</div>
+</div>
+
+<script>
+	document.querySelectorAll<HTMLButtonElement>('.play-overlay').forEach((btn) => {
+		btn.addEventListener('click', () => {
+			const id = btn.dataset.target;
+			const iframe = document.getElementById(id!) as HTMLIFrameElement | null;
+			const wrap = btn.parentElement;
+			if (!iframe || !wrap) return;
+
+			iframe.addEventListener('load', () => {
+				try {
+					const doc = iframe.contentDocument;
+					if (!doc) return;
+
+					// Make the canvas fill the frame responsively
+					const style = doc.createElement('style');
+					style.textContent = `
+						html, body { margin: 0; width: 100%; height: 100%; }
+						.canvas-container, #canvas { width: 100% !important; height: 100% !important; }
+					`;
+					doc.head.appendChild(style);
+
+					// Sync the wrapper's aspect ratio to the canvas's actual
+					// resolution as soon as the game sets it.
+					const canvas = doc.getElementById('canvas') as HTMLCanvasElement | null;
+					if (canvas) {
+						const syncRatio = () => {
+							if (canvas.width && canvas.height) {
+								wrap.style.setProperty('--ratio', `${canvas.width} / ${canvas.height}`);
+							}
+						};
+						syncRatio();
+						new MutationObserver(syncRatio).observe(canvas, {
+							attributes: true,
+							attributeFilter: ['width', 'height'],
+						});
+					}
+				} catch {
+					// Same-origin access failed for some reason; keep the default ratio.
+				}
+			});
+
+			const src = iframe.dataset.src;
+			if (src) iframe.src = src;
+			wrap.classList.add('started');
+			btn.remove();
+		});
+	});
+</script>
+
+<style>
+	.wasm-demo {
+		display: flex;
+		justify-content: center;
+		margin: 2.5rem 0;
+	}
+	.frame-wrap {
+		position: relative;
+		width: 100%;
+		max-width: 900px;
+		aspect-ratio: var(--ratio);
+		border-radius: 16px;
+		overflow: hidden;
+		border: 1px solid var(--border);
+		background: #06162d;
+	}
+	iframe {
+		width: 100%;
+		height: 100%;
+		border: 0;
+		display: block;
+	}
+	.play-overlay {
+		position: absolute;
+		inset: 0;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 0.75rem;
+		width: 100%;
+		height: 100%;
+		background: rgba(6, 22, 45, 0.85);
+		border: none;
+		color: var(--text);
+		font-family: var(--font-display);
+		font-size: 0.9rem;
+		cursor: pointer;
+		transition: background 0.2s ease;
+	}
+	.play-overlay:hover {
+		background: rgba(6, 22, 45, 0.7);
+	}
+	.play-icon {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 56px;
+		height: 56px;
+		border-radius: 50%;
+		border: 2px solid var(--accent);
+		color: var(--accent);
+		font-size: 1.3rem;
+	}
+</style>
