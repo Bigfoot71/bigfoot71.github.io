@@ -1,0 +1,24 @@
+---
+title: "r3d"
+image: "/projects/r3d/cover.png"
+tags: ["c", "raylib", "rendering"]
+description: "A 3D rendering extension for raylib, adding a full PBR pipeline without turning it into a full engine."
+---
+
+import YouTubeEmbed from '../../components/YouTubeEmbed.astro';
+
+r3d is a 3D extension library for [raylib](https://www.raylib.com/). raylib is deliberately minimal on the 3D side, so r3d fills that gap with a proper rendering pipeline, PBR materials, dynamic lighting, and the utilities that go with them, without turning raylib into a full-blown engine.
+
+Under the hood it's a hybrid renderer, deferred for opaque geometry and forward for transparency, with a full PBR material system (Burley diffuse, Schlick-GGX specular), support for custom surface/sky/screen shaders, and image-based lighting via reflection probes.
+
+On top of that there's a decent post-processing stack (SSAO, SSGI, SSR, bloom, DoF, volumetric fog, tonemapping), frustum culling, instanced rendering, and a basic kinematics system with capsule and mesh colliders for when you need simple physics without pulling in a full physics engine.
+
+The API stays close to raylib's own style and conventions on purpose, so if you know raylib, r3d should feel vey familiar.
+
+There are also r3d bindings for various languages, such as [Odin](https://github.com/Bigfoot71/r3d-odin), [C#](https://github.com/graphnode/r3d-cs), and [FreePascal](https://github.com/GuvaCode/ray4laz_r3d).
+
+<YouTubeEmbed id="PYuDgO0NuYs" title="Asteroid gameplay" />
+
+## Links
+
+- [Source code on GitHub](https://github.com/Bigfoot71/r3d)
