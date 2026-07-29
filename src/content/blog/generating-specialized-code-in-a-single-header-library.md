@@ -2,7 +2,7 @@
 title: "Generating specialized code in a single-header library"
 description: "A self-inclusion trick to generate specialized function variants at compile time, without leaving the single-header constraint."
 date: 2026-07-29
-tags: ["c", "pre-processor", "meta-programming"]
+tags: ["c", "meta-programming"]
 ---
 
 To kick off this blog, I want to share a small trick I came up with while working on [rlsw.h](https://github.com/raysan5/raylib/blob/master/src/external/rlsw.h), the software rendering backend I contributed to [raylib](https://www.raylib.com/).
