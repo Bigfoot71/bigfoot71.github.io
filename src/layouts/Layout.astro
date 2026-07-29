@@ -100,6 +100,24 @@ const ogImage = image ? new URL(image, Astro.site) : new URL('/og-default.png', 
 
 		--font-display: 'JetBrains Mono', monospace;
 		--font-body: 'Inter', sans-serif;
+
+		/* Code block background hierarchy: page < header bar < code body */
+		--code-header-bg: #161C28;
+		--code-body-bg: #1B2230;
+		--code-border: #262F40;
+
+		/* Shiki (code syntax highlighting) */
+		--astro-code-foreground: #D7DEE7;
+		--astro-code-background: var(--code-body-bg);
+		--astro-code-token-comment: #6B7685;
+		--astro-code-token-keyword: #4CC9FF;
+		--astro-code-token-string: #8FD6B4;
+		--astro-code-token-string-expression: #8FD6B4;
+		--astro-code-token-constant: #E8B368;
+		--astro-code-token-function: #B79EF5;
+		--astro-code-token-parameter: #E893B8;
+		--astro-code-token-punctuation: #8B96A5;
+		--astro-code-token-link: #4CC9FF;
 	}
 
 	* {
@@ -145,6 +163,16 @@ const ogImage = image ? new URL(image, Astro.site) : new URL('/og-default.png', 
 		font-size: 0.85rem;
 		line-height: 1.6;
 		border: none;
+		background: var(--code-body-bg) !important;
+		font-family: var(--font-display);
+	}
+
+	pre.astro-code::-webkit-scrollbar {
+		height: 6px;
+	}
+	pre.astro-code::-webkit-scrollbar-thumb {
+		background: var(--border);
+		border-radius: 3px;
 	}
 
 	code:not(pre code) {
@@ -159,7 +187,7 @@ const ogImage = image ? new URL(image, Astro.site) : new URL('/og-default.png', 
 	.code-block {
 		margin: 1.75rem 0;
 		border-radius: 12px;
-		border: 1px solid var(--border);
+		border: 1px solid var(--code-border);
 		overflow: hidden;
 	}
 
@@ -168,8 +196,8 @@ const ogImage = image ? new URL(image, Astro.site) : new URL('/og-default.png', 
 		align-items: center;
 		justify-content: space-between;
 		padding: 0.5rem 1rem;
-		background: var(--surface);
-		border-bottom: 1px solid var(--border);
+		background: var(--code-header-bg);
+		border-bottom: 1px solid var(--code-border);
 	}
 
 	.code-block-lang {

@@ -7,4 +7,9 @@ import mdx from '@astrojs/mdx';
 export default defineConfig({
   site: 'https://bigfoot71.github.io',
   integrations: [mdx()],
+  markdown: {
+    shikiConfig: {
+      theme: 'css-variables',
+    },
+  },
 });
