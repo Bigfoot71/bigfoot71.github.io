@@ -6,4 +6,67 @@ import Layout from '../layouts/Layout.astro';
 	<p>
 		Lorem ipsum dolor sit amet, placeholder text.
 	</p>
+
+	<section class="contact">
+		<h2>Get in touch</h2>
+		<p>Open to freelance work, collabs, or just talking low-level and graphics programming.</p>
+		<div class="contact-links">
+			<a href="mailto:contact@bigfoot71.anonaddy.com" class="contact-btn">Email me</a>
+			<button id="discord-copy" class="contact-btn" type="button">
+				Discord: <span id="discord-handle">bigfoot71</span>
+			</button>
+		</div>
+	</section>
 </Layout>
+
+<script>
+	const btn = document.getElementById('discord-copy');
+	const handleEl = document.getElementById('discord-handle');
+	btn?.addEventListener('click', async () => {
+		const handle = handleEl?.textContent ?? '';
+		await navigator.clipboard.writeText(handle);
+		const original = btn.textContent;
+		btn.textContent = 'Copied!';
+		setTimeout(() => {
+			btn.innerHTML = `Discord: <span id="discord-handle">${handle}</span>`;
+		}, 1500);
+	});
+</script>
+
+<style>
+	.contact {
+		margin-top: 3rem;
+		padding-top: 2rem;
+		border-top: 1px solid var(--border);
+	}
+	.contact h2 {
+		margin-bottom: 0.5rem;
+	}
+	.contact p {
+		color: var(--text-muted);
+		margin-bottom: 1rem;
+	}
+	.contact-links {
+		display: flex;
+		gap: 1rem;
+		flex-wrap: wrap;
+	}
+	.contact-btn {
+		display: inline-block;
+		padding: 0.6rem 1.2rem;
+		border: 1px solid var(--border);
+		border-radius: 8px;
+		background: none;
+		appearance: none;
+		text-decoration: none;
+		color: var(--text);
+		font-family: var(--font-display);
+		font-size: 0.9rem;
+		cursor: pointer;
+		transition: border-color 0.2s ease, color 0.2s ease;
+	}
+	.contact-btn:hover {
+		border-color: var(--accent);
+		color: var(--accent);
+	}
+</style>
