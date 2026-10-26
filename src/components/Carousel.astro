@@ -1,0 +1,211 @@
+---
+interface Image {
+	src: string;
+	alt?: string;   // also serves as a legend
+}
+
+interface Props {
+	images: Image[];
+	ratio?: string; // display area format
+}
+const { images, ratio = '16 / 9' } = Astro.props;
+const many = images.length > 1;
+---
+{images.length > 0 && (
+	<div class="carousel" role="region" aria-roledescription="carousel" aria-label="Screenshots" style={`--ratio: ${ratio}`}>
+		<div class="frame">
+			<div class="track" tabindex="0">
+				{images.map((img, i) => (
+					<figure class="slide">
+						<img src={img.src} alt={img.alt ?? ''} loading={i === 0 ? 'eager' : 'lazy'} draggable="false" />
+						{img.alt && (
+							<figcaption>{img.alt}</figcaption>
+						)}
+					</figure>
+				))}
+			</div>
+
+			{many && (
+				<>
+					<button type="button" class="nav prev" aria-label="Previous image">
+						<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg>
+					</button>
+					<button type="button" class="nav next" aria-label="Next image">
+						<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6" /></svg>
+					</button>
+				</>
+			)}
+		</div>
+
+		{many && (
+			<div class="dots">
+				{images.map((_, i) => (
+					<button type="button" class="dot" aria-label={`Go to image ${i + 1}`}></button>
+				))}
+			</div>
+		)}
+	</div>
+)}
+
+<style>
+	.carousel {
+		margin: 1.75rem 0;
+	}
+
+	.frame {
+		position: relative;
+		border-radius: 12px;
+		border: 1px solid var(--border);
+		overflow: hidden;
+		background: var(--surface);
+	}
+
+	.track {
+		display: flex;
+		overflow-x: auto;
+		scroll-snap-type: x mandatory;
+		overscroll-behavior-x: contain;
+		scrollbar-width: none;
+	}
+	.track::-webkit-scrollbar {
+		display: none;
+	}
+	.track:focus-visible {
+		outline: 2px solid var(--accent);
+		outline-offset: -2px;
+	}
+
+	.slide {
+		position: relative;
+		flex: 0 0 100%;
+		margin: 0;
+		aspect-ratio: var(--ratio);
+		scroll-snap-align: start;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: linear-gradient(135deg, var(--surface), #171D29);
+	}
+	.slide img {
+		width: 100%;
+		height: 100%;
+		object-fit: contain;
+		display: block;
+		user-select: none;
+	}
+
+	figcaption {
+		position: absolute;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		padding: 1.5rem 1rem 0.7rem;
+		background: linear-gradient(to top, rgba(11, 14, 20, 0.9), transparent);
+		font-size: 0.85rem;
+		color: var(--text);
+		text-align: center;
+	}
+
+	.nav {
+		position: absolute;
+		top: 50%;
+		transform: translateY(-50%);
+		width: 2.25rem;
+		height: 2.25rem;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0;
+		border-radius: 50%;
+		background: rgba(11, 14, 20, 0.75);
+		border: 1px solid var(--border);
+		color: var(--text-muted);
+		backdrop-filter: blur(2px);
+		cursor: pointer;
+		appearance: none;
+		transition: border-color 0.2s ease, color 0.2s ease, opacity 0.2s ease;
+	}
+	.nav:hover:not(:disabled) {
+		border-color: var(--accent);
+		color: var(--accent);
+	}
+	.nav:disabled {
+		opacity: 0;
+		pointer-events: none;
+	}
+	.prev { left: 0.75rem; }
+	.next { right: 0.75rem; }
+
+	.dots {
+		display: flex;
+		justify-content: center;
+		gap: 0.5rem;
+		margin-top: 0.75rem;
+	}
+	.dot {
+		position: relative;
+		width: 8px;
+		height: 8px;
+		padding: 0;
+		border: none;
+		border-radius: 4px;
+		background: var(--border);
+		cursor: pointer;
+		appearance: none;
+		transition: width 0.25s ease, background 0.25s ease;
+	}
+	/* Clickable area larger than the dot */
+	.dot::after {
+		content: '';
+		position: absolute;
+		inset: -8px -4px;
+	}
+	.dot:hover {
+		background: var(--text-muted);
+	}
+	.dot.active {
+		width: 22px;
+		background: var(--accent);
+	}
+</style>
+
+<script>
+	const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+	document.querySelectorAll<HTMLElement>('.carousel').forEach((root) => {
+		const track = root.querySelector<HTMLElement>('.track')!;
+		const count = track.children.length;
+		const dots  = root.querySelectorAll<HTMLButtonElement>('.dot');
+		const prev  = root.querySelector<HTMLButtonElement>('.prev');
+		const next  = root.querySelector<HTMLButtonElement>('.next');
+
+		const current = () => Math.round(track.scrollLeft / (track.clientWidth || 1));
+
+		const go = (i: number) => {
+			const index = Math.max(0, Math.min(count - 1, i));
+			track.scrollTo({ left: index * track.clientWidth, behavior: reduced ? 'auto' : 'smooth' });
+		};
+
+		const update = () => {
+			const i = current();
+			dots.forEach((dot, n) => {
+				dot.classList.toggle('active', n === i);
+				dot.toggleAttribute('aria-current', n === i);
+			});
+			if (prev) prev.disabled = i <= 0;
+			if (next) next.disabled = i >= count - 1;
+		};
+
+		track.addEventListener('scroll', update, { passive: true });
+		prev?.addEventListener('click', () => go(current() - 1));
+		next?.addEventListener('click', () => go(current() + 1));
+		dots.forEach((dot, n) => dot.addEventListener('click', () => go(n)));
+
+		track.addEventListener('keydown', (e) => {
+			if (e.key === 'ArrowLeft')  { e.preventDefault(); go(current() - 1); }
+			if (e.key === 'ArrowRight') { e.preventDefault(); go(current() + 1); }
+		});
+
+		update();
+	});
+</script>
