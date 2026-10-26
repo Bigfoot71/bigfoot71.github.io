@@ -1,0 +1,22 @@
+---
+title: "sfgen"
+image: "/projects/sfgen/cover.png"
+tags: ["c3", "tools", "animation"]
+description: "A small tool that interpolates and cleans up sprite animations."
+---
+
+sfgen is a small tool to smooth out and clean up sprite animations. Drop in a PNG spritesheet or a GIF, chain a few effects, compare with the original, and export a spritesheet or a GIF.
+
+It started when a developer I know had to make his own animations because his deadline was close and his animator couldn't deliver in time. He isn't an animator, so the result was understandably choppy, and I wondered if the frames could be interpolated to make it smoother.
+
+The first effect I wrote tracks where each block of pixels went between two frames, which gives a map of the motion. It then moves the pixels part of the way along it to create new frames in between, with more of them where there is more movement. When two frames disagree on a pixel, it takes the color from the closest one instead of blending.
+
+That motion map turned out to be useful elsewhere, so I built a few more effects on top of it, like removing jitter and drift, evening out the speed of the motion, hiding the pop between the last and first frame of a loop, and keeping only the key frames.
+
+It's not generative AI, just "smart interpolation", so it can only move and mix pixels that already exist, so it can't invent what isn't there, and fast or complex movements will break it. It's meant to save time on the boring parts, not to replace an animator.
+
+sfgen is free, but any financial support on itch.io is much appreciated.
+
+## Links
+
+- [Download on itch.io](https://bigfoot71.itch.io/sfgen)
