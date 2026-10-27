@@ -1,0 +1,23 @@
+---
+title: "Runawhere"
+image: "/demos/runawhere/cover.png"
+date: 2026-07-29
+tags: ["game", "raylib", "odin"]
+description: "A 2D maze game where you play a light that's slowly dying."
+---
+
+import WasmDemo from '../../components/WasmDemo.astro';
+
+I made this for fun. You move a light through a maze, find the exit, and try not to go dark before you get there, because your range shrinks over time, and if it hits zero, it's over.
+
+Along the way there are orbs. Grab them and they give you a temporary boost. Save them and you can spend them to slow down your decay, or unlock different color themes and tile patterns for the maze walls, nothing gameplay-critical, just a bit of variety.
+
+The loop is pretty simple: go fast, grab orbs, find the exit, repeat.
+
+## Links
+
+- [Download on itch.io](https://bigfoot71.itch.io/runawhere)
+
+## Play it below
+
+<WasmDemo path="/demos/runawhere/wasm/index.html" title="Runawhere" width={800} height={450} />
