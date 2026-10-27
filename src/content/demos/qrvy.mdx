@@ -1,0 +1,32 @@
+---
+title: "qrvy"
+image: "/demos/qrvy/cover.png"
+date: 2026-07-29
+tags: ["tool", "raylib", "c3"]
+description: "Easing curve editor with optimized GLSL export."
+---
+
+import WasmDemo from '../../components/WasmDemo.astro';
+
+qrvy is a small tool for designing custom easing curves.
+
+Place points, adjust their weights, and get a smooth cubic curve you can export as a GLSL function.
+
+## Try it below
+
+<WasmDemo path="/demos/qrvy/wasm/index.html" title="qrvy" width={800} height={450} />
+
+## GLSL export
+
+Each pair of points becomes a cubic Hermite segment.
+
+Before writing any GLSL, the generator simplifies them in a few passes:
+
+- Merging consecutive segments that are the same polynomial.
+- Compacting each polynomial by dropping zero terms, reducing the degree and factoring low powers into Horner form.
+- Mirroring symmetric curves so only half is emitted.
+
+## Links
+
+- [Source code on GitHub](https://github.com/Bigfoot71/qrvy)
+- [Download on GitHub](https://github.com/Bigfoot71/qrvy/releases)
