@@ -1,23 +1,17 @@
 ---
 title: "Generating specialized code in a single-header library"
 description: "A self-inclusion trick to generate specialized function variants at compile time, without leaving the single-header constraint."
-date: 2026-07-29
+date: 2026-10-28
 tags: ["c", "meta-programming"]
 ---
 
-To kick off this blog, I want to share a small trick I came up with while working on [rlsw.h](https://github.com/raysan5/raylib/blob/master/src/external/rlsw.h), the software rendering backend I contributed to [raylib](https://www.raylib.com/).
+I contributed [rlsw.h](https://github.com/raysan5/raylib/blob/master/src/external/rlsw.h) to [raylib](https://www.raylib.com/), a software renderer that implements the same feature set as [rlgl.h](https://github.com/raysan5/raylib/blob/master/src/rlgl.h) with OpenGL 1.1 as backend (points, lines, triangles, texturing, blending, depth test, scissor...). It has to stay a single header, and it has to be fast enough for constrained targets like the [ESP32](https://en.wikipedia.org/wiki/ESP32).
 
-## The goal
+This post is about one trick I used to get there. I thought I had come up with it, then found out it already existed. I'm sharing it anyway, because I haven't seen it used in single-header libraries.
 
-rlsw aims to support the same feature set already exposed by [rlgl.h](https://github.com/raysan5/raylib/blob/master/src/rlgl.h) for OpenGL 1.1, like rasterizing points, lines, triangles and quads, nearest/linear texturing, blend modes, depth testing, scissor clipping, and so on.
+## The problem
 
-The catch: it has to stay a single header.
-
-And since one of the goals was to run on fairly constrained hardware (like [ESP32](https://en.wikipedia.org/wiki/ESP32)), performance matters just as much as feature coverage.
-
-## Why dynamic branching doesn't cut it
-
-The naive way to support all these states is to check them per pixel:
+Supporting every combination of states naively means checking them per pixel:
 
 ```c
 for (int y = 0; y < h; y++) {
@@ -28,32 +22,26 @@ for (int y = 0; y < h; y++) {
 
         Color result = frag_color;
 
-        if (state & TEXTURING) {
-            result *= sample_texture(texture, frag_texcoord);
-        }
-
-        if (state & BLENDING) {
-            result = blend(result, get_color(x, y));
-        }
+        if (state & TEXTURING) result *= sample_texture(texture, frag_texcoord);
+        if (state & BLENDING)  result = blend(result, get_color(x, y));
 
         set_color(x, y, result);
     }
 }
 ```
 
-This example is extremely simplified, but even like this, every pixel pays the cost of branches that resolve the same way for the entire draw call. What we actually want is a specialized version of this loop for each combination of states, generated ahead of time rather than branched on at runtime.
+Those branches resolve the same way for the whole draw call, yet every pixel pays for them. What we want is one specialized loop per combination of states, and writing them all by hand doesn't scale.
 
-Writing every combination by hand isn't realistic though; the number of states involved makes that grow out of hand fast.
+## Templating by including a file repeatedly
 
-## Templating through repeated inclusion
+Mesa's software rasterizer already does this with [s_tritemp.h](https://cgit.arctica-project.org/vcxsrv/tree/mesalib/src/mesa/swrast/s_tritemp.h), a template file is included several times, each time with different macros defined, and each inclusion produces a specialized function.
 
-This isn't a new idea. Mesa's software rasterizer does something similar with [s_tritemp.h](https://cgit.arctica-project.org/vcxsrv/tree/mesalib/src/mesa/swrast/s_tritemp.h): a template file gets included multiple times, each time with a different set of macros defined beforehand, producing a specialized function per combination.
-
-The difference with rlsw is the single-header constraint: there's no separate template file to include. So the header needs to include *itself*, which C actually allows via `__FILE__`:
+That needs a separate template file, which a single header can't have. The workaround is to have the header include itself through `__FILE__`:
 
 ```c
-// somewhere near the top of the header, for every state
-// combination we want to generate:
+#ifndef SW_DRAW_FLAGS
+// normal pass: the library itself
+
 #define SW_DRAW_FLAGS (SW_BLENDING)
 #include __FILE__
 #undef SW_DRAW_FLAGS
@@ -62,24 +50,18 @@ The difference with rlsw is the single-header constraint: there's no separate te
 #include __FILE__
 #undef SW_DRAW_FLAGS
 
-// ... one block per combination we care about
+// ... one block per combination
 
-// a dispatch table mapping pipeline state to the right function
 static RasterFn dispatch_table[] = {
-    [SW_BLENDING]                  = SW_RASTER_NAME(SW_BLENDING),
-    [SW_BLENDING | SW_TEXTURING]   = SW_RASTER_NAME(SW_BLENDING | SW_TEXTURING),
+    [SW_BLENDING]                = SW_RASTER_NAME(SW_BLENDING),
+    [SW_BLENDING | SW_TEXTURING] = SW_RASTER_NAME(SW_BLENDING | SW_TEXTURING),
     // ...
 };
 
-void draw_triangle(void) {
-    dispatch_table[ctx.state]();
-}
-```
+void draw_triangle(void) { dispatch_table[ctx.state](); }
 
-```c
-// further down in the same header: the actual template,
-// only compiled when the header re-includes itself
-#ifdef SW_DRAW_FLAGS
+#else
+// template pass: only compiled on self-inclusion
 
 void SW_RASTER_NAME(SW_DRAW_FLAGS)(void) {
     for (int y = 0; y < h; y++) {
@@ -103,15 +85,13 @@ void SW_RASTER_NAME(SW_DRAW_FLAGS)(void) {
     }
 }
 
-#endif
+#endif // SW_DRAW_FLAGS
 ```
 
-`SW_RASTER_NAME` is a small token-pasting macro that turns the flag combination into a unique function name, so each specialization gets its own symbol instead of colliding. The real implementation in rlsw handles a few more details around include guards and name generation than shown here; the full version is [in the source](https://github.com/raysan5/raylib/blob/master/src/external/rlsw.h#L2994-L3138) if you want to see it end to end.
+`SW_DRAW_FLAGS` is what tells the two passes apart, when it's defined, the header is being re-included as a template and only the function body is compiled. `SW_RASTER_NAME` is a token-pasting macro that turns the flags into a unique function name. The real implementation has a few more details; see [in the source](https://github.com/raysan5/raylib/blob/master/src/external/rlsw.h#L2962-L3030).
 
-## Trade-offs
+## Conclusion
 
-This isn't free. The number of specializations grows with every state you add to the combination, and at some point code size starts to matter, especially on the kind of constrained targets rlsw is meant to run on. It's a balance between avoiding per-pixel branching and not generating more code than a given target can afford.
+Each state you add multiplies the number of specializations, and code size grows with it. On small targets you have to pick which combinations are worth generating.
 
-Still, I think this pattern is useful beyond software rendering. Any single-header C project juggling a handful of orthogonal compile-time options could reach for the same trick.
-
-If you've seen this self-inclusion approach used elsewhere, I'd be curious to hear about it, feel free to reach out.
+The trick isn't limited to rendering per se, it can be useful in any single-header C library that needs templated functions. If you know of other projects using it, I'd love to hear about them!
