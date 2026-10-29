@@ -1,0 +1,48 @@
+---
+title: "tapy"
+image: "/demos/tapy/cover.png"
+date: 2026-10-29
+tags: ["tool", "raylib", "c3", "glsl"]
+description: "Convolution kernel editor with GLSL export."
+---
+
+import WasmDemo from '../../components/WasmDemo.astro';
+
+tapy is a small tool for designing convolution kernels.
+
+Set the taps on the grid their weights by hand or with automatic distributions, and preview the result on your own image. The kernel is exported as a GLSL function.
+
+## Try it below
+
+<WasmDemo path="/demos/tapy/app/index.html" title="tapy" width={800} height={450} />
+
+The embedded version is too small to show the whole interface (the GLSL panel is hidden at this size).
+For the best experience, use the [full-page version](/demos/tapy/app/index.html).
+
+Drag and drop an image onto the window to replace the default one.
+
+## Editing
+
+- Left click on the grid toggles a tap, right click selects it so you can type its weight.
+- Weights can be distributed automatically (uniform or gaussian) and normalized.
+- Both previews can be zoomed with the mouse wheel and panned.
+- The result keeps transparency.
+
+## Linear mode
+
+By default taps sit on texel centers and the image is sampled with nearest filtering.
+
+Enabling linear mode subdivides the grid into halves or quarters of a texel, so taps can be placed at fractional offsets.
+
+## GLSL export
+
+The kernel is exported as an unrolled `vec4 convolve(sampler2D, vec2, vec2)` function, with one line per tap and zero-weight taps skipped.
+
+## Links
+
+- [Source code on GitHub](https://github.com/Bigfoot71/tapy)
+- [Download on GitHub](https://github.com/Bigfoot71/tapy/releases)
+
+## Credits
+
+The default image is a photograph by Leonhard Niederwimmer, available on [Unsplash](https://unsplash.com/photos/a-very-tall-building-with-some-very-big-pillars-2lArT4Ja4Ew).
