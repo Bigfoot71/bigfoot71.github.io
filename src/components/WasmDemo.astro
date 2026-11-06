@@ -4,11 +4,12 @@ interface Props {
 	title: string;
 	width: number;
 	height: number;
+	isolated?: boolean;
 }
-const { path, title, width, height } = Astro.props;
+const { path, title, width, height, isolated = false } = Astro.props;
 ---
 
-<div class="wasm-demo" data-src={path} style={`--w: ${width}; --h: ${height};`}>
+<div class="wasm-demo" data-wasm-isolated={isolated ? '' : undefined} data-src={path} style={`--w: ${width}; --h: ${height};`}>
 	<iframe title={title} allow="autoplay; gamepad; fullscreen"></iframe>
 	<button class="play-overlay" type="button">
 		<span class="play-icon">▶</span>
@@ -17,6 +18,30 @@ const { path, title, width, height } = Astro.props;
 </div>
 
 <script>
+	// Isolation cross-origin
+	async function ensureIsolation() {
+		const needed = Array.from(document.querySelectorAll<HTMLElement>('.wasm-demo')).some(
+			(d) => d.dataset.wasmIsolated !== undefined,
+		);
+		if (!needed || !('serviceWorker' in navigator)) return;
+
+		if (crossOriginIsolated) {
+			sessionStorage.removeItem('wasm-sw-reloaded');
+			return;
+		}
+
+		const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+		await navigator.serviceWorker.register(`${base}/wasm-sw.js`);
+		await navigator.serviceWorker.ready;
+
+		if (!sessionStorage.getItem('wasm-sw-reloaded')) {
+			sessionStorage.setItem('wasm-sw-reloaded', '1');
+			location.reload();
+		}
+	}
+	ensureIsolation();
+
+	// Launch with style override
 	const SHELL_OVERRIDE = `
 		html, body, .canvas-container, canvas {
 			width: 100% !important;
