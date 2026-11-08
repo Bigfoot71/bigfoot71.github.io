@@ -1,4 +1,6 @@
 ---
+import PlayButton from './PlayButton.astro';
+
 interface Props {
 	path: string;
 	title: string;
@@ -11,9 +13,8 @@ const { path, title, width, height, isolated = false } = Astro.props;
 
 <div class="wasm-demo" data-wasm-isolated={isolated ? '' : undefined} data-src={path} style={`--w: ${width}; --h: ${height};`}>
 	<iframe title={title} allow="autoplay; gamepad; fullscreen"></iframe>
-	<button class="play-overlay" type="button">
-		<span class="play-icon">▶</span>
-		<span>Click to launch</span>
+	<button class="play-overlay play-trigger" type="button" aria-label={`Launch: ${title}`}>
+		<PlayButton label="Click to launch" />
 	</button>
 </div>
 
@@ -123,10 +124,8 @@ const { path, title, width, height, isolated = false } = Astro.props;
 		inset: 0;
 		z-index: 1;
 		display: flex;
-		flex-direction: column;
 		align-items: center;
 		justify-content: center;
-		gap: 0.75rem;
 		border: none;
 		background: color-mix(in srgb, var(--bg) 85%, transparent);
 		color: var(--text);
@@ -138,14 +137,8 @@ const { path, title, width, height, isolated = false } = Astro.props;
 	.play-overlay:hover {
 		background: color-mix(in srgb, var(--bg) 70%, transparent);
 	}
-	.play-icon {
-		display: grid;
-		place-items: center;
-		width: 56px;
-		height: 56px;
-		border-radius: 50%;
-		border: 2px solid var(--accent);
-		color: var(--accent);
-		font-size: 1.3rem;
+	.play-overlay:focus-visible {
+		outline: 2px solid var(--accent);
+		outline-offset: -2px;
 	}
 </style>

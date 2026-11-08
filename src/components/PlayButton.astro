@@ -1,0 +1,58 @@
+---
+interface Props {
+	label: string;
+}
+const { label } = Astro.props;
+---
+<span class="play-cta">
+	<span class="badge">
+		<svg
+			viewBox="0 0 24 24"
+			width="24"
+			height="24"
+			fill="currentColor"
+			stroke="currentColor"
+			stroke-width="1.5"
+			stroke-linejoin="round"
+			aria-hidden="true"
+			focusable="false"
+		>
+			<path d="M8.7 6.2V17.8L18.6 12Z" />
+		</svg>
+	</span>
+	<span class="label">{label}</span>
+</span>
+
+<style>
+	.play-cta {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.9rem;
+	}
+
+	.badge {
+		display: grid;
+		place-items: center;
+		width: 56px;
+		height: 56px;
+		border-radius: 50%;
+		border: 1px solid currentColor;
+		color: var(--text-muted);
+		transition: color 0.2s ease;
+	}
+
+	.label {
+		color: var(--text-muted);
+		transition: color 0.2s ease;
+	}
+
+	:global(.play-trigger:hover) .badge,
+	:global(.play-trigger:focus-visible) .badge {
+		color: var(--accent);
+	}
+	:global(.play-trigger:hover) .label,
+	:global(.play-trigger:focus-visible) .label {
+		color: var(--text);
+	}
+</style>
