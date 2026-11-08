@@ -1,0 +1,48 @@
+---
+title: "rm-racer"
+image: "/demos/rm-racer/cover.png"
+date: 2026-08-11
+tags: ["raymarching", "software-rendering", "c3"]
+description: "Software raymarcher running on CPU"
+---
+
+import WasmDemo from '../../components/WasmDemo.astro';
+import Video from '../../components/Video.astro';
+
+This is a demo of a software raymarcher running on the CPU, which I wrote in [C3](https://c3-lang.org/).
+
+Here the mini game is just an excuse to showcase the raymarcher, hence the inconsistency between the title screen and the game, I just did this for fun ^^
+
+You can find the [source code on GitHub](https://github.com/Bigfoot71/rm-c3).
+
+## Play it below
+
+<WasmDemo path="/demos/rm-racer/app/index.html" title="RM Racer" width={800} height={450} isolated />
+
+## Examples
+
+To make sure the mini game runs reasonably well for everyone, the WASM demo is rendered at a very low resolution and then upscaled for display.
+
+But you can achieve much better rendering quality when running it natively on desktop, so here are a few short video examples in 1280x720:
+
+<Video src="/demos/rm-racer/videos/demo-1.mp4" ratio="16 / 9" />
+<Video src="/demos/rm-racer/videos/demo-2.mp4" ratio="16 / 9" />
+
+## More infos
+
+This raymarcher is implemented with a several sort of optimizations to make it usable in realtime, especially in WASM here:
+
+- SIMD rendering (rays are processed in packets, one lane per pixel)
+- 16x16 pixel tiled rendering for good cache locality
+- Multithreading, where tiles are distributed across multiple threads, with cache line aligned buffers to avoid false sharing
+- Beam pass, where a first coarse pass marches a cone enclosing each tile to obtain a safe starting distance, avoiding having to retrace the beginning of the path for every pixel
+- Sphere tracing over-relaxation with automatic backtracking when overshooting the surface
+- Adaptive intersection threshold based on distance for fewer iterations on distant surfaces
+
+It also features (enabled at compile time):
+
+- Analytic anti-aliasing that uses grazing rays detected during marching to estimate edge coverage
+- Temporal anti-aliasing with jitter and reprojection
+- sRGB output and debanding
+
+And for development a collection of signed distance functions, plenty of PBR shading functions, and mathematical functions for manipulating SIMD vectors of vectors.
