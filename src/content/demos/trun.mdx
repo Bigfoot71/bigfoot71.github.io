@@ -1,0 +1,36 @@
+---
+title: "trun"
+image: "/demos/trun/cover.png"
+date: 2026-11-08
+tags: ["raymarching", "sdf", "c3"]
+description: "Mini raymarched game"
+---
+
+import WasmDemo from '../../components/WasmDemo.astro';
+import Video from '../../components/Video.astro';
+
+Just a small raymarching game I originally made to practice and experiment with the technique, after having some fun building a [software raymarcher](/demos/rm-racer).
+
+In this mini game, you control a spaceship and must move forward while avoiding obstacles, using the arrow keys or WASD. Collect crystals along the way to gain speed and extra time, and try to travel as far as possible before the timer runs out.
+
+I find the idea pretty cool, even if it's probably nothing new, the inspiration actually came from a mix of minecraft's dropper maps and the atmosphere of some activities in saints row 3/4
+
+I might eventually update it with more varied challenges and find something to do with the crystals you collect outside of runs, but only if I can manage not to get distracted by other projects first! :3
+
+## Play it below
+
+<WasmDemo path="/demos/trun/app/index.html" title="TRUN" width={800} height={450} />
+
+## More infos
+
+To make this mini game I first made a "toolkit" written in C3 to make creating scenes in GLSL as easy as possible. It's compatible with everything from WebGL 1 to OpenGL 4.x and includes some optimizations originally designed for my software raymarcher.
+
+You can find the source code here: https://github.com/Bigfoot71/rlm-c3
+
+## Links
+
+- [Download on itch.io](https://bigfoot71.itch.io/trun)
+
+## Credits
+
+Music: [Mezhdunami - Flashes](https://pixabay.com/music/synthwave-mezhdunami-flashes-95436/)
